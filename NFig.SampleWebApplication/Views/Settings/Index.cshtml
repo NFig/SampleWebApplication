@@ -1,0 +1,31 @@
+﻿@using CommonMark
+@model NFig.SampleWebApplication.Models.SettingsListModel
+@{
+    ViewBag.Title = "Settings";
+
+    var grouped = Model.SettingInfos.GroupBy(i => i.Name.Substring(0, i.Name.IndexOf(".", StringComparison.InvariantCulture)));
+}
+
+@foreach (var grp in grouped.OrderBy(g => g.Key))
+{
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">@grp.Key</h4>
+        </div>
+        @foreach (var info in grp)
+        {
+            var active = info.GetActiveValueFor(Config.Tier, Config.DataCenter);
+            var className = active.IsOverride ? "bg-info" : "";
+
+            <div class="panel-body setting @className">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <strong><a href="@Url.Action("Edit", new { settingName = active.Name })">@info.Name</a></strong>
+                        <span class="setting-subtext">@Html.Raw(CommonMarkConverter.Convert(@info.Description))</span>
+                    </div>
+                    <div class="col-sm-6"><pre class="setting-value">@active.Value</pre></div>
+                </div>
+            </div>
+        }
+    </div>
+}

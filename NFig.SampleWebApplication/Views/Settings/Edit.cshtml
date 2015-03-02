@@ -1,0 +1,218 @@
+﻿@using NFig
+@model NFig.SampleWebApplication.Models.SettingEditModel
+@{
+    ViewBag.Title = Model.SettingInfo.Name + " - Calculon Settings";
+
+    var possibleErrorClass = Model.IsInvalid ? "has-error" : "";
+    var tierClass = "";
+    switch (Config.Tier)
+    {
+        case Tier.Local:
+            tierClass = "label-success";
+            break;
+        case Tier.Dev:
+            tierClass = "label-primary";
+            break;
+        case Tier.Prod:
+            tierClass = "label-danger";
+            break;
+    }
+}
+
+<div class="page-header">
+    <h2>@Model.SettingInfo.Name - @Config.ApplicationName Settings</h2>
+</div>
+
+<p><a href="@Url.Action("Index")">&#9664; Back to Settings List</a></p>
+<table class="table table-condensed">
+    <tr>
+        <th style="width: 100px;">Name</th>
+        <td>@Model.SettingInfo.Name</td>
+    </tr>
+    <tr>
+        <th>Description</th>
+        <td>@Html.Raw(Model.DescriptionHtml)</td>
+    </tr>
+    <tr>
+        <th>Current Tier</th>
+        <td><span class="label @tierClass">@Config.Tier</span></td>
+    </tr>
+</table>
+<div class="panel panel-primary">
+    <div class="panel-heading">Current Values by Data Center</div>
+    <div class="panel-body">
+        <div class="row hidden-xs setting">
+            <div class="col-sm-3">
+                <strong>Data Center</strong>
+            </div>
+            <div class="col-sm-3">
+                <strong>Default Value</strong>
+            </div>
+            <div class="col-sm-3">
+                <strong>Override</strong>
+            </div>
+            <div class="col-sm-3">
+                <strong>Active Value</strong>
+            </div>
+        </div>
+        @foreach (var dc in Model.AvailableDataCenters)
+        {
+            <div class="row setting">
+                <span class="col-xs-3 visible-xs setting-label">Data Center:</span>
+                <div class="col-sm-3" style="overflow: auto;">
+                    @PrintPossiblyActiveDataCenter(dc)
+                </div>
+                <div class="clearfix visible-xs setting-separator"></div>
+                <span class="col-xs-3 visible-xs setting-label">Default Value:</span>
+                <div class="col-sm-3" style="overflow: auto;">
+                    @PrintInheritedValue(Model.SettingInfo.GetDefaultFor(Config.Tier, dc), dc)
+                </div>
+                <div class="clearfix visible-xs setting-separator"></div>
+                <span class="col-xs-3 visible-xs setting-label">Override:</span>
+                <div class="col-sm-3" style="overflow: auto;">
+                    @PrintPossibleValue(Model.SettingInfo.GetOverrideFor(Config.Tier, dc), dc)
+                </div>
+                <div class="clearfix visible-xs setting-separator"></div>
+                <span class="col-xs-3 visible-xs setting-label">Active Value:</span>
+                <div class="col-sm-3" style="overflow: auto;">
+                    @if (dc != DataCenter.Any) // there's no "active" value for the "Any" data center
+                    {
+                        @PrintInheritedValue(Model.SettingInfo.GetActiveValueFor(Config.Tier, dc), dc, true)
+                    }
+                    else
+                    {
+                        @:&nbsp;
+                    }
+                </div>
+                <div class="clearfix visible-xs setting-separator"></div>
+            </div>
+        }
+    </div>
+</div>
+
+@if (Model.RequiresRestart)
+{
+    <div class="alert alert-danger" role="alert">Any changes to this setting will not take affect until the next application restart.</div>
+}
+
+@using (Html.BeginForm("Edit", "Settings", new { settingName = Model.SettingInfo.Name, dc = Model.EditingDataCenter }, FormMethod.Post))
+{
+    <div class="form-group @possibleErrorClass">
+        <label class="control-label" for="ValueInput">Edit Override (by Data Center)</label>
+        <ul class="nav nav-tabs">
+            @foreach (var dc in Model.AvailableDataCenters)
+            {
+                var className = dc == Model.EditingDataCenter ? "active" : "";
+                <li role="presentation" class="@className">
+                    <a href="@Url.Action("Edit", new { settingName = Model.SettingInfo.Name, dc })">@dc</a>
+                </li>
+            }
+        </ul>
+        <textarea class="form-control" name="Value" id="ValueInput" rows="8">@Model.Value</textarea>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-4 visible-xs-block visible-sm-inline-block visible-md visible-lg">
+            <button type="submit" class="btn btn-primary btn-block" name="action"
+                    value="save-override">
+                Save Override (@Config.Tier, @PrintDataCenterName(Model.EditingDataCenter))
+            </button>
+        </div>
+        <div class="clearfix visible-xs setting-separator"></div>
+        <div class="col-sm-4 visible-xs-block visible-sm-inline-block visible-md visible-lg">
+            <button type="submit" class="btn btn-danger btn-block" name="action"
+                    value="clear-override">
+                Clear Override (@Config.Tier, @PrintDataCenterName(Model.EditingDataCenter))
+            </button>
+        </div>
+        <div class="clearfix visible-xs setting-separator"></div>
+        <div class="col-sm-4 visible-xs-block visible-sm-inline-block visible-md visible-lg">
+            <a class="btn btn-default btn-block" href="@Url.Action("Index")">Cancel</a>
+        </div>
+        <input type="hidden" name="EditingTier" value="@Model.EditingTier" />
+        <input type="hidden" name="EditingDataCenter" value="@Model.EditingDataCenter" />
+    </div>
+}
+
+<hr />
+@PrintAllValues("Overrides", Model.SettingInfo.Overrides)
+@PrintAllValues("Defaults", Model.SettingInfo.Defaults)
+
+@helper PrintSettingValue(string value)
+{
+    if (value != null)
+    {
+        <pre class="setting-value">@value</pre>
+    }
+    else
+    {
+        <em>null</em>
+    }
+}
+@helper PrintDataCenterName(DataCenter dataCenter)
+{
+    @dataCenter
+
+    if (dataCenter == DataCenter.Any)
+    {
+        WriteLiteral(" DC");
+    }
+}
+@helper PrintPossiblyActiveDataCenter(DataCenter dataCenter)
+{
+    @dataCenter
+
+    if (dataCenter == Config.DataCenter)
+    {
+        <span class="label label-default">active</span>
+    }
+}
+
+@helper PrintPossibleValue(SettingValue<Tier, DataCenter> value, DataCenter dataCenter)
+{
+    if (value == null)
+    {
+        <div class="setting-subtext">(none)</div>
+    }
+    else
+    {
+        @PrintInheritedValue(value, dataCenter)
+    }
+}
+@helper PrintInheritedValue(SettingValue<Tier, DataCenter> value, DataCenter dataCenter, bool alwaysShowInheritance = false)
+{
+    if (alwaysShowInheritance || value.Tier != Config.Tier || value.DataCenter != dataCenter)
+    {
+        var msg = value.IsOverride ? "Override" : "Default";
+        var tier = value.Tier + (value.Tier == Tier.Any ? " Tier" : "");
+        var dc = value.DataCenter + (value.DataCenter == DataCenter.Any ? " DC" : "");
+        <div class="setting-subtext">@msg from (@tier, @dc)</div>
+    }
+
+    @PrintSettingValue(value.Value)
+}
+@helper PrintAllValues(string name, IList<SettingValue<Tier, DataCenter>> values)
+{
+    <div class="panel panel-default">
+        <div class="panel-heading"><strong>All @name</strong></div>
+        <table class="table">
+            <thead>
+                <tr class="active">
+                    <th style="width: 15%">Tier</th>
+                    <th style="width: 15%">Data Center</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var val in values)
+                {
+                    <tr>
+                        <td>@val.Tier</td>
+                        <td>@val.DataCenter</td>
+                        <td>@PrintSettingValue(val.Value)</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

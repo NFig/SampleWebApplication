@@ -1,5 +1,4 @@
 ﻿body {
-    padding-top: 50px;
     padding-bottom: 20px;
 }
 
@@ -16,9 +15,47 @@
     white-space: normal;
 }
 
-/* Set width on the form input elements since they're 100% wide by default */
-input,
-select,
-textarea {
-    max-width: 280px;
+.page-header {
+    margin: 0 0 10px;
+    padding-bottom: 0;
+}
+
+.bg-info {
+    background-color: #d9edf7;
+}
+
+/* Settings Styles */
+
+.setting {
+    border-bottom: 1px solid #ddd;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+pre.setting-value {
+    background-color: #fcfcfc;
+    border-color: #eee;
+    -ms-word-break: normal;
+    word-break: normal;
+    -ms-word-wrap: normal;
+    word-wrap: normal;
+}
+
+.setting:last-child {
+    border-bottom: none;
+}
+
+.setting-subtext {
+    color: #777;
+    font-size: 85%;
+}
+
+.setting-label {
+    width: 30%;
+    font-weight: bold;
+}
+
+.setting-separator {
+    margin-top: 5px;
+    margin-bottom: 5px;
 }

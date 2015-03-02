@@ -1,31 +1,42 @@
-﻿@{
+﻿@using System.Text.RegularExpressions
+@{
     ViewBag.Title = "Home Page";
 }
 
 <div class="jumbotron">
-    <h1>ASP.NET</h1>
-    <p class="lead">ASP.NET is a free web framework for building great Web sites and Web applications using HTML, CSS and JavaScript.</p>
-    <p><a href="http://asp.net" class="btn btn-primary btn-lg">Learn more &raquo;</a></p>
+    <h1>NFig Web Example</h1>
+    <p class="lead">
+        This application is intended to give you a fee for how <a href="https://github.com/NFig/NFig">NFig</a> works.
+        NFig is a C# config/settings library for easily managing application settings in
+        environments with multiple deployment tiers, and multiple data centers.
+        This example is built on top of <a href="https://github.com/NFig/NFig.Redis">NFig.Redis</a>, which uses
+        <a href="http://redis.io/">Redis</a> to store setting overrides in a persistent manner, and a pub/sub for 
+        broadcasting live updates to multiple servers.
+    </p>
+    <p><a href="https://github.com/NFig" class="btn btn-primary btn-lg">NFig on GitHub &raquo;</a></p>
 </div>
 
 <div class="row">
     <div class="col-md-4">
-        <h2>Getting started</h2>
+        <h2>Favorite Number</h2>
         <p>
-            ASP.NET MVC gives you a powerful, patterns-based way to build dynamic websites that
-            enables a clean separation of concerns and gives you full control over markup
-            for enjoyable, agile development.
+            My favorite number is currently @Config.Settings.Home.FavoriteNumber, but I could change that at any time because it's controlled by a setting.
         </p>
-        <p><a class="btn btn-default" href="http://go.microsoft.com/fwlink/?LinkId=301865">Learn more &raquo;</a></p>
+        <p><a class="btn btn-default" href="@Url.Action("Edit", "Settings", new { settingName = "Home.FavoriteNumber" })">Edit Favorite Number &raquo;</a></p>
     </div>
     <div class="col-md-4">
-        <h2>Get more libraries</h2>
-        <p>NuGet is a free Visual Studio extension that makes it easy to add, remove, and update libraries and tools in Visual Studio projects.</p>
-        <p><a class="btn btn-default" href="http://go.microsoft.com/fwlink/?LinkId=301866">Learn more &raquo;</a></p>
+        <h2>Useful Links</h2>
+        <ul>
+            @foreach(var link in Config.Settings.Home.UsefulLinks)
+            {
+                <li><a href="@link">@Regex.Replace(link, "^https?://", "")</a></li>
+            }
+        </ul>
+        <p><a class="btn btn-default" href="@Url.Action("Edit", "Settings", new { settingName = "Home.UsefulLinks" })">Edit Useful Links &raquo;</a></p>
     </div>
     <div class="col-md-4">
-        <h2>Web Hosting</h2>
-        <p>You can easily find a web hosting company that offers the right mix of features and price for your applications.</p>
-        <p><a class="btn btn-default" href="http://go.microsoft.com/fwlink/?LinkId=301867">Learn more &raquo;</a></p>
+        <h2>@Config.Settings.Home.ThirdBoxTitle</h2>
+        <p>@Config.Settings.Home.ThirdBoxContent</p>
+        <p><a class="btn btn-default" href="@Url.Action("Index", "Settings")">Edit Settings &raquo;</a></p>
     </div>
 </div>
