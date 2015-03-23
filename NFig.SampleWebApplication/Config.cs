@@ -22,7 +22,7 @@ namespace NFig.SampleWebApplication
         Europe = 4,
     }
 
-    public class Config
+    public static class Config
     {
         private static readonly NFigRedisStore<Settings, Tier, DataCenter> s_store;
         private static Timer s_settingsPollTimer;
