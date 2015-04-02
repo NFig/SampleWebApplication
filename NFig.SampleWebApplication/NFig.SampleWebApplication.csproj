@@ -39,20 +39,22 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="CommonMark">
-      <HintPath>..\packages\CommonMark.NET.0.8.4\lib\net45\CommonMark.dll</HintPath>
+    <Reference Include="CommonMark, Version=0.1.0.0, Culture=neutral, PublicKeyToken=001ef8810438905d, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\CommonMark.NET.0.8.5\lib\net45\CommonMark.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="NFig, Version=0.9.0.9, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="NFig, Version=0.9.1.13, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\NFig.0.9.0-unstable9\lib\net45\NFig.dll</HintPath>
+      <HintPath>..\packages\NFig.0.9.1\lib\net45\NFig.dll</HintPath>
     </Reference>
-    <Reference Include="NFig.Redis, Version=1.1.1.5, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="NFig.Redis, Version=1.1.2.8, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\NFig.Redis.1.1.1-unstable5\lib\net45\NFig.Redis.dll</HintPath>
+      <HintPath>..\packages\NFig.Redis.1.1.2\lib\net45\NFig.Redis.dll</HintPath>
     </Reference>
-    <Reference Include="StackExchange.Redis">
-      <HintPath>..\packages\StackExchange.Redis.1.0.394\lib\net45\StackExchange.Redis.dll</HintPath>
+    <Reference Include="StackExchange.Redis, Version=1.0.316.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\StackExchange.Redis.1.0.414\lib\net45\StackExchange.Redis.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
