@@ -135,7 +135,7 @@ public static void CheckForSettingUpdates()
 
 ### Setting Converters
 
-All settings, regardless of type, are stored as strings. Therefore, every type needs to have a conversion to and from strings. NFig has built-in support for `bool`, `byte`, `short`, `ushort`, `int`, `uint`, `long`, `ulong`, `float`, `double`, `string`, and `char` types. If you want to use another type for a setting, then you need to build a converter for it which implements [ISettingConverter<T>](https://github.com/NFig/NFig/blob/master/NFig/SettingConverterAttribute.cs#L27).
+All settings, regardless of type, are stored as strings. Therefore, every type needs to have a conversion to and from strings. NFig has built-in support for `bool`, `byte`, `short`, `ushort`, `int`, `uint`, `long`, `ulong`, `float`, `double`, `decimal`, `string`, and `char` types. If you want to use another type for a setting, then you need to build a converter for it which implements [ISettingConverter<T>](https://github.com/NFig/NFig/blob/master/NFig/SettingConverterAttribute.cs#L27).
 
 An example of this is in [SettingsHelpers.cs](https://github.com/NFig/SampleWebApplication/blob/master/NFig.SampleWebApplication/SettingsHelpers.cs). This example converter converts a multi-line string to a `List<string>` and back.
 
