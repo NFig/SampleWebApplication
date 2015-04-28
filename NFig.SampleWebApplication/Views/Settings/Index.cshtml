@@ -69,7 +69,9 @@
             updateUrl(text);
         }, 100);
 
-        $('#search input').on('keyup', function () {
+        $('#search input').on('keyup', function (e) {
+            if (e.which === 27)
+                $(this).val('');
             filterSettings($(this).val());
         });
 
