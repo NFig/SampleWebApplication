@@ -6,9 +6,18 @@
     var grouped = Model.SettingInfos.GroupBy(i => i.Name.Substring(0, i.Name.IndexOf(".", StringComparison.InvariantCulture)));
 }
 
+<form class="form-inline">
+    <div class="input-group" id="search">
+        <span class="input-group-addon"><i class="glyphicon glyphicon-search"></i></span>
+        <input type="text" class="form-control" placeholder="Filter" />
+    </div>
+</form>
+
+<hr />
+
 @foreach (var grp in grouped.OrderBy(g => g.Key))
 {
-    <div class="panel panel-default">
+    <div class="panel panel-default setting-group">
         <div class="panel-heading">
             <h4 class="panel-title">@grp.Key</h4>
         </div>
@@ -28,4 +37,48 @@
             </div>
         }
     </div>
+}
+
+@section scripts {
+    <script>
+        var updateUrl = _.debounce(function (text) {
+            var url = location.protocol + '//' + location.host + location.pathname +
+                (text ? '?filter=' + text : '') + location.hash;
+            if (url !== location.href) {
+                history.pushState(null, null, url);
+            }
+        }, 1500);
+
+        var filterSettings = _.debounce(function (text) {
+            var groups = $('.setting-group');
+            var settings = $('.setting');
+            groups.show();
+            settings.show();
+            if (text !== '') {
+                var re = /\s*(?:"([^"]*)"|(\S+))/g;
+                var match;
+                while ((match = re.exec(text))) {
+                    settings.filter(':not(:contains-ci("' + (match[1] || match[2]) + '"))').hide();
+                }
+
+                // hide any setting-group that don't have any visible setting
+                groups.not('.setting-group:has(.setting:visible)').hide();
+            }
+
+            updateUrl.cancel();
+            updateUrl(text);
+        }, 100);
+
+        $('#search input').on('keyup', function () {
+            filterSettings($(this).val());
+        });
+
+        $.extend($.expr[':'], {
+            'contains-ci': function (elem, i, match, array) {
+                return (elem.textContent || elem.innerText || $(elem).Text() || '')
+                    .toLowerCase()
+                    .indexOf((match[3] || '').toLowerCase()) >= 0;
+            }
+        });
+    </script>
 }
