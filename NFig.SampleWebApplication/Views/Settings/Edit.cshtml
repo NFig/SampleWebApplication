@@ -1,7 +1,7 @@
 ﻿@using NFig
 @model NFig.SampleWebApplication.Models.SettingEditModel
 @{
-    ViewBag.Title = Model.SettingInfo.Name + " - Calculon Settings";
+    ViewBag.Title = Model.SettingInfo.Name + " - Sample Settings";
 
     var possibleErrorClass = Model.IsInvalid ? "has-error" : "";
     var tierClass = "";
@@ -19,8 +19,12 @@
     }
 }
 
+@section head {
+    <style>.setting { display: block; }</style>
+}
+
 <div class="page-header">
-    <h2>@Model.SettingInfo.Name - @Config.ApplicationName Settings</h2>
+    <h2>@Model.SettingInfo.Name</h2>
 </div>
 
 <p><a href="@Url.Action("Index")">&#9664; Back to Settings List</a></p>
@@ -41,7 +45,7 @@
 <div class="panel panel-primary">
     <div class="panel-heading">Current Values by Data Center</div>
     <div class="panel-body">
-        <div class="row hidden-xs setting">
+        <div class="row hidden-xs">
             <div class="col-sm-3">
                 <strong>Data Center</strong>
             </div>
@@ -108,7 +112,7 @@
                 </li>
             }
         </ul>
-        <textarea class="form-control" name="Value" id="ValueInput" rows="8">@Model.Value</textarea>
+        <textarea class="form-control setting-edit" name="Value" id="ValueInput" rows="8">@Model.Value</textarea>
     </div>
 
     <div class="row">
@@ -138,11 +142,11 @@
 @PrintAllValues("Overrides", Model.SettingInfo.Overrides)
 @PrintAllValues("Defaults", Model.SettingInfo.Defaults)
 
-@helper PrintSettingValue(string value)
+@helper PrintSettingValue(string value, bool active = false)
 {
     if (value != null)
     {
-        <pre class="setting-value">@value</pre>
+        <pre class="@("setting-value" + (active ? " active" : ""))">@value</pre>
     }
     else
     {
@@ -172,24 +176,24 @@
 {
     if (value == null)
     {
-        <div class="setting-subtext">(none)</div>
+        <p>(none)</p>
     }
     else
     {
         @PrintInheritedValue(value, dataCenter)
     }
 }
-@helper PrintInheritedValue(SettingValue<Tier, DataCenter> value, DataCenter dataCenter, bool alwaysShowInheritance = false)
+@helper PrintInheritedValue(SettingValue<Tier, DataCenter> value, DataCenter dataCenter, bool activeColumn = false)
 {
-    if (alwaysShowInheritance || value.Tier != Config.Tier || value.DataCenter != dataCenter)
+    @PrintSettingValue(value.Value, activeColumn && dataCenter == Config.DataCenter)
+
+    if (activeColumn || value.Tier != Config.Tier || value.DataCenter != dataCenter)
     {
         var msg = value.IsOverride ? "Override" : "Default";
         var tier = value.Tier + (value.Tier == Tier.Any ? " Tier" : "");
         var dc = value.DataCenter + (value.DataCenter == DataCenter.Any ? " DC" : "");
-        <div class="setting-subtext">@msg from (@tier, @dc)</div>
+        <p>@msg from (@tier, @dc)</p>
     }
-
-    @PrintSettingValue(value.Value)
 }
 @helper PrintAllValues(string name, IList<SettingValue<Tier, DataCenter>> values)
 {

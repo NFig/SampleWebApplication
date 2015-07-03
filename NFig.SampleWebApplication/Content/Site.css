@@ -26,19 +26,79 @@
 
 /* Settings Styles */
 
+.bordered {
+    border: 1px solid #ddd;
+    border-top: none;
+}
+
+.setting-group h4 {
+    font-weight: bold;
+    padding: 5px 8px;
+    background-color: #eee;
+    border-top: 1px solid #ddd;
+    margin: 0;
+}
+
 .setting {
-    border-bottom: 1px solid #ddd;
-    padding-top: 5px;
-    padding-bottom: 5px;
+    padding-top: 0;
+    padding-bottom: 0;
+    display: flex;
+    -ms-flex-direction: row;
+    flex-direction: row;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+    align-items: stretch;
+    border-top: 1px solid #ddd;
+}
+
+.setting p {
+    color: #777;
+    font-size: 85%;
+}
+
+.setting a:hover {
+    text-decoration: none;
+}
+
+.setting a:hover > strong {
+    text-decoration: underline;
+}
+
+.setting .name {
+    margin: 0;
+    padding: 5px 8px;
+    width: 50%;
+}
+
+.setting .name p {
+    margin: 0;
+}
+
+.setting .value {
+    margin: 0;
+    padding: 5px 8px;
+    border-radius: 0;
+    background-color: #fafafa;
+    width: 50%;
+    border: none;
+    border-left: 1px solid #ddd;
+}
+
+.setting.bg-info .value {
+    background-color: transparent;
+    border-left: 1px solid #ddd;
 }
 
 pre.setting-value {
-    background-color: #fcfcfc;
-    border-color: #eee;
-    -ms-word-break: normal;
-    word-break: normal;
-    -ms-word-wrap: normal;
-    word-wrap: normal;
+    margin: 0;
+    padding: 5px 8px;
+    border-radius: 0;
+    background-color: #fafafa;
+    border: none;
+}
+
+pre.setting-value.active {
+    background-color: #edf2f9;
 }
 
 .setting:last-child {
@@ -58,4 +118,35 @@ pre.setting-value {
 .setting-separator {
     margin-top: 5px;
     margin-bottom: 5px;
+}
+
+textarea.setting-edit {
+    font-family: monospace;
+}
+
+@media (max-width: 767px) {
+
+    .bordered { border: none; }
+
+    .setting-group {
+        border: none;
+        margin-bottom: 20px;
+    }
+
+    .setting-group .setting {
+        display: block;
+        border: 1px solid #ddd;
+        margin-top: 5px;
+    }
+            
+    .setting-group .setting .name {
+        width: auto;
+    }
+
+    .setting-group .setting .value {
+        display: block;
+        width: auto;
+        border-top: 1px solid #ddd;
+        border-left-width: 4px;
+    }
 }
