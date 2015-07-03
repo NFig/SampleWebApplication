@@ -28,7 +28,7 @@ http://stackoverflow.com
 http://google.com
 ")]
             [StringsByLine]
-            [Description("Useful links to show on the home page (one per line).")]
+            [Description("Useful links to show on the home page (one per line). Probably want to keep [Stack Overflow](http://stackoverflow.com) in this list.")]
             public List<string> UsefulLinks { get; private set; }
 
             [Setting("Editable Box")]

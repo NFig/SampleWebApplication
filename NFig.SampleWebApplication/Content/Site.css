@@ -56,21 +56,17 @@
     font-size: 85%;
 }
 
-.setting a:hover {
-    text-decoration: none;
-}
-
-.setting a:hover > strong {
-    text-decoration: underline;
-}
-
 .setting .name {
     margin: 0;
     padding: 5px 8px;
     width: 50%;
 }
 
-.setting .name p {
+.setting .name > strong > a {
+    display: block;
+}
+
+.setting .name > p {
     margin: 0;
 }
 

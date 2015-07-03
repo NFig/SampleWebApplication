@@ -26,10 +26,10 @@
 
                 <a class="setting-anchor" id="@(info.Name.ToLowerInvariant().Replace(".", "-"))-setting"></a>
                 <div class="@className setting">
-                    <a class="name" href="@Url.Action("Edit", new {settingName = active.Name})">
-                        <strong>@info.Name</strong>
+                    <div class="name">
+                        <strong><a href="@Url.Action("Edit", new {settingName = active.Name})">@info.Name</a></strong>
                         @Html.Raw(CommonMarkConverter.Convert(@info.Description))
-                    </a>
+                    </div>
                     <pre class="value">@active.Value</pre>
                 </div>
             }
