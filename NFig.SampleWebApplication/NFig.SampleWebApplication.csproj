@@ -20,6 +20,7 @@
     <IISExpressAnonymousAuthentication />
     <IISExpressWindowsAuthentication />
     <IISExpressUseClassicPipelineMode />
+    <UseGlobalApplicationHostFile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -44,17 +45,17 @@
       <HintPath>..\packages\CommonMark.NET.0.8.5\lib\net45\CommonMark.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="NFig, Version=0.9.1.13, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\NFig.0.9.1\lib\net45\NFig.dll</HintPath>
+    <Reference Include="NFig, Version=1.0.0.21, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\NFig.1.0.0\lib\net45\NFig.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="NFig.Redis, Version=1.1.2.8, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\NFig.Redis.1.1.2\lib\net45\NFig.Redis.dll</HintPath>
+    <Reference Include="NFig.Redis, Version=1.1.5.19, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\NFig.Redis.1.1.5\lib\net45\NFig.Redis.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="StackExchange.Redis, Version=1.0.316.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\StackExchange.Redis.1.0.414\lib\net45\StackExchange.Redis.dll</HintPath>
+      <HintPath>..\packages\StackExchange.Redis.1.0.450\lib\net45\StackExchange.Redis.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
