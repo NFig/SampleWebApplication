@@ -1,88 +1,19 @@
-﻿@using CommonMark
-@model NFig.SampleWebApplication.Models.SettingsListModel
-@{
+﻿@{
     ViewBag.Title = "Settings";
-
-    var grouped = Model.SettingInfos.GroupBy(i => i.Name.Substring(0, i.Name.IndexOf(".", StringComparison.InvariantCulture)));
 }
 
-<form class="form-inline">
-    <div class="input-group" id="search">
-        <span class="input-group-addon"><i class="glyphicon glyphicon-search"></i></span>
-        <input type="text" class="form-control" placeholder="Filter"/>
-    </div>
-</form>
-
-<div class="bordered" style="margin-top: 16px;">
-    @foreach (var grp in grouped.OrderBy(g => g.Key))
-    {
-        <div class="setting-group">
-            <a class="setting-anchor" id="@(grp.Key.ToLowerInvariant())-group"></a>
-            <h4>@grp.Key</h4>
-            @foreach (var info in grp)
-            {
-                var active = info.GetActiveValueFor(Config.Tier, Config.DataCenter);
-                var className = active.IsOverride ? "bg-info" : "";
-
-                <a class="setting-anchor" id="@(info.Name.ToLowerInvariant().Replace(".", "-"))-setting"></a>
-                <div class="@className setting">
-                    <div class="name">
-                        <strong><a href="@Url.Action("Edit", new {settingName = active.Name})">@info.Name</a></strong>
-                        @Html.Raw(CommonMarkConverter.Convert(@info.Description))
-                    </div>
-                    <pre class="value">@active.Value</pre>
-                </div>
-            }
-        </div>
-    }
-</div>
+<div id="settings"></div>
 
 @section scripts {
-    <script>
-        var updateUrl = _.debounce(function (text) {
-            var url = location.protocol + '//' + location.host + location.pathname +
-                (text ? '?filter=' + text : '') + location.hash;
-            if (url !== location.href) {
-                history.pushState(null, null, url);
-            }
-        }, 1500);
-
-        var filterSettings = _.debounce(function (text) {
-            var groups = $('.setting-group');
-            var settings = $('.setting');
-            groups.show();
-            settings.show();
-            if (text !== '') {
-                var re = /\s*(?:"([^"]*)"|(\S+))/g;
-                var match;
-                while ((match = re.exec(text))) {
-                    settings.filter(':not(:contains-ci("' + (match[1] || match[2]) + '"))').hide();
-                }
-
-                // hide any setting-group that don't have any visible setting
-                groups.not('.setting-group:has(.setting:visible)').hide();
-            }
-
-            updateUrl.cancel();
-            updateUrl(text);
-        }, 100);
-
-        $('#search input').on('keyup', function (e) {
-            if (e.which === 27)
-                $(this).val('');
-            filterSettings($(this).val());
-        });
-
-        $.extend($.expr[':'], {
-            'contains-ci': function (elem, i, match, array) {
-                return (elem.textContent || elem.innerText || $(elem).Text() || '')
-                    .toLowerCase()
-                    .indexOf((match[3] || '').toLowerCase()) >= 0;
-            }
-        });
-
-        $(function() {
-          $('#search input').focus();
-        });
-    </script>
+@Scripts.Render("~/Scripts/settings-panel.js")
+<script>
+window.settingsList = SettingsPanel.init(
+    document.getElementById('settings'),
+    {
+        settingsUrl: "@Url.Action("Json")",
+        setUrl: "@Url.Action("SetOverride")",
+        clearUrl: "@Url.Action("ClearOverride")"
+    }
+);
+</script>
 }

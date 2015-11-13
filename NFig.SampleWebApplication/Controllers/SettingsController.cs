@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
+using System.Net;
+using System.Threading.Tasks;
 using System.Web.Mvc;
-using CommonMark;
-using NFig.SampleWebApplication.Models;
 
 namespace NFig.SampleWebApplication.Controllers
 {
@@ -12,81 +9,85 @@ namespace NFig.SampleWebApplication.Controllers
     public class SettingsController : Controller
     {
         [Route("")]
-        public ActionResult Index(string help)
+        public ActionResult Index(string help) => View();
+
+
+        [Route("json")]
+        public async Task<ActionResult> Json()
         {
-            var model = new SettingsListModel();
-            model.SettingInfos = Config.NFigAsyncStore.GetAllSettingInfos(Config.ApplicationName);
-            return View(model);
+            try
+            {
+                return Content(await Config.GetSettingsJsonAsync(), "application/json");
+            }
+            catch (Exception ex)
+            {
+                return new ErrorResult(HttpStatusCode.InternalServerError, ex.ToString());
+            }
         }
 
-        [Route("edit/{settingName}")]
-        [HttpGet]
-        public ActionResult Edit(string settingName, DataCenter? dc = null)
-        {
-            if (!Config.NFigAsyncStore.SettingExists(settingName))
-                return HttpNotFound();
-
-            var model = new SettingEditModel();
-            model.EditingDataCenter = dc ?? DataCenter.Any;
-
-            PopulateSettingEditModel(settingName, model);
-
-            var over = model.SettingInfo.GetOverrideFor(Config.Tier, model.EditingDataCenter);
-            if (over != null && over.DataCenter == model.EditingDataCenter)
-                model.Value = over.Value;
-
-            return View(model);
-        }
-
-        [Route("edit/{settingName}")]
+        [Route("set")]
         [HttpPost]
-        public ActionResult Edit(string settingName, string action, SettingEditModel model, DataCenter? dc = null)
+        public  async Task<ActionResult> SetOverride(string settingName, string value, DataCenter dataCenter)
         {
-            if (model.EditingTier != Config.Tier)
-                throw new Exception("Don't try to fake which tier you're on when editing settings, idiot.");
+            try
+            {
+                if (!await Config.AllowsOverrideFor(settingName, dataCenter))
+                    return new ErrorResult(HttpStatusCode.NotImplemented, $"Setting {settingName} does not allow overrides for Data Center {dataCenter}");
 
-            if (action == "save-override")
-            {
-                if (Config.NFigAsyncStore.IsValidStringForSetting(settingName, model.Value))
-                {
-                    // set the override
-                    Config.NFigAsyncStore.SetOverride(Config.ApplicationName, settingName, model.Value, Config.Tier, model.EditingDataCenter);
-                }
-                else
-                {
-                    model.IsInvalid = true;
-                }
-            }
-            else if (action == "clear-override")
-            {
-                Config.NFigAsyncStore.ClearOverride(Config.ApplicationName, settingName, Config.Tier, model.EditingDataCenter);
-                model.Value = null;
-            }
-            else
-            {
-                throw new Exception("Unknown setting edit action: " + action);
-            }
+                if (!Config.NFigAsyncStore.IsValidStringForSetting(settingName, value))
+                    return new ErrorResult(HttpStatusCode.Conflict, $"\"{value}\" is an invalid value for setting {settingName}");
 
-            if (model.IsInvalid)
-            {
-                PopulateSettingEditModel(settingName, model);
-                return View(model);
-            }
+                await Config.NFigAsyncStore.SetOverrideAsync(Config.ApplicationName, settingName, value, Config.Tier, dataCenter);
 
-            return RedirectToAction("Edit", new { settingName, dc });
+                return Content(await Config.GetSettingJsonAsync(settingName), "application/json");
+            }
+            catch (Exception ex)
+            {
+                // Do something with the error
+                return new ErrorResult(HttpStatusCode.InternalServerError, "An error occurred while processing the request.");
+            }
         }
 
-        private void PopulateSettingEditModel(string settingName, SettingEditModel model)
+        [Route("clear")]
+        [HttpPost]
+        public async Task<ActionResult> ClearOverride(string settingName, DataCenter dataCenter)
         {
-            model.SettingInfo = Config.NFigAsyncStore.GetSettingInfo(Config.ApplicationName, settingName);
+            try
+            {
+                await Config.NFigAsyncStore.ClearOverrideAsync(Config.ApplicationName, settingName, Config.Tier, dataCenter);
+                return Content(await Config.GetSettingJsonAsync(settingName), "application/json");
+            }
+            catch (Exception ex)
+            {
+                // Do something with the error
+                return new ErrorResult(HttpStatusCode.InternalServerError, "An error occurred while processing the request.");
+            }
+        }
 
-            model.EditingTier = Config.Tier;
-            model.DescriptionHtml = CommonMarkConverter.Convert(model.SettingInfo.Description);
-            model.RequiresRestart = model.SettingInfo.PropertyInfo.GetCustomAttribute<RequiresRestartAttribute>() != null;
+        public class ErrorResult : ActionResult
+        {
+            readonly HttpStatusCode _code;
+            readonly string _content;
 
-            IEnumerable<DataCenter> dcs = (DataCenter[])Enum.GetValues(typeof(DataCenter));
-            dcs = Config.Tier == Tier.Local ? dcs.Where(d => d == DataCenter.Any || d == DataCenter.Local) : dcs.Where(d => d != DataCenter.Local);
-            model.AvailableDataCenters = dcs.ToList();
+
+            public ErrorResult(HttpStatusCode code, string content)
+            {
+                _code = code;
+                _content = content;
+            }
+
+
+            public override void ExecuteResult(ControllerContext context)
+            {
+                if (context == null)
+                    throw new ArgumentNullException(nameof(context));
+
+                context.HttpContext.Response.StatusCode = (int)_code;
+                if (_content == null)
+                    return;
+
+                context.HttpContext.Response.Write(_content);
+            }
         }
     }
 }

@@ -1,7 +1,4 @@
-﻿
-
-
-using NFig;
+﻿using NFig;
 
 namespace NFig.SampleWebApplication
 {

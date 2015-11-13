@@ -1,7 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Configuration;
+using System.Linq;
+
 using NFig.Redis;
 using System.Threading;
+using System.Threading.Tasks;
+
+using NFig.Ui;
+
 
 namespace NFig.SampleWebApplication
 {
@@ -100,6 +107,43 @@ namespace NFig.SampleWebApplication
                 // call an updated event so any part of our application can subscribe
                 SettingsUpdated?.Invoke(settings);
             }
+        }
+
+        public static IList<DataCenter> GetAvailableDataCenters()
+        {
+            IEnumerable<DataCenter> dcs = (DataCenter[])Enum.GetValues(typeof(DataCenter));
+            dcs = Tier == Tier.Local
+                ? dcs.Where(d => d == DataCenter.Any || d == DataCenter.Local)
+                : dcs.Where(d => d != DataCenter.Local);
+
+            return dcs.ToList();
+        }
+
+
+        public static Task<string> GetSettingsJsonAsync()
+        {
+            return NFigAsyncStore.GetSettingsJsonAsync(
+                ApplicationName,
+                Tier,
+                DataCenter,
+                GetAvailableDataCenters());
+        }
+
+        public static async Task<bool> AllowsOverrideFor(string settingName, DataCenter dataCenter)
+        {
+            var info = await NFigAsyncStore.GetSettingInfoAsync(ApplicationName, settingName);
+            return info.CanSetOverrideFor(Tier, dataCenter);
+        }
+
+
+        public static async Task<string> GetSettingJsonAsync(string settingName)
+        {
+            return await NFigAsyncStore.GetSettingJsonAsync(
+                ApplicationName,
+                settingName,
+                Tier,
+                DataCenter,
+                GetAvailableDataCenters());
         }
     }
 }
