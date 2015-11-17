@@ -7,7 +7,7 @@ using NFig.Redis;
 using System.Threading;
 using System.Threading.Tasks;
 
-using NFig.Ui;
+using NFig.UI;
 
 
 namespace NFig.SampleWebApplication
