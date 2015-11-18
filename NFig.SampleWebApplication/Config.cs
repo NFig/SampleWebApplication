@@ -4,7 +4,6 @@ using System.Configuration;
 using System.Linq;
 
 using NFig.Redis;
-using System.Threading;
 using System.Threading.Tasks;
 
 using NFig.UI;
@@ -32,7 +31,6 @@ namespace NFig.SampleWebApplication
     public static class Config
     {
         private static readonly NFigRedisStore<Settings, Tier, DataCenter> s_store;
-        private static Timer s_settingsPollTimer;
 
         public static readonly string ApplicationName;
         public static readonly Tier Tier;
@@ -48,7 +46,7 @@ namespace NFig.SampleWebApplication
         {
             // load fixed data from Web.config
             ApplicationName = ConfigurationManager.AppSettings["ApplicationName"];
-            if (String.IsNullOrEmpty(ApplicationName))
+            if (string.IsNullOrEmpty(ApplicationName))
             {
                 throw new Exception("ApplicationName must be provided in Web.Config AppSettings");
             }
@@ -64,7 +62,7 @@ namespace NFig.SampleWebApplication
             }
 
             RedisConnectionString = ConfigurationManager.AppSettings["RedisConnectionString"];
-            if (String.IsNullOrEmpty(RedisConnectionString))
+            if (string.IsNullOrEmpty(RedisConnectionString))
             {
                 throw new Exception("RedisConnectionString must be provided in Web.Config AppSettings");
             }
@@ -73,25 +71,8 @@ namespace NFig.SampleWebApplication
             s_store = new NFigRedisStore<Settings, Tier, DataCenter>(RedisConnectionString, 0);
 
             // subscribe to updates
+            // also loads initial settings as OnSettingsUpdate is called during subscribe
             s_store.SubscribeToAppSettings(ApplicationName, Tier, DataCenter, OnSettingsUpdate);
-
-            // load initial settings
-            ReloadSettings();
-
-            // setup a timer to check for updates in case Redis pub/sub fails
-            var interval = TimeSpan.FromSeconds(Settings.NFig.PollingInterval);
-            s_settingsPollTimer = new Timer(o => CheckForSettingUpdates(), null, interval, interval);
-        }
-
-        private static void ReloadSettings()
-        {
-            OnSettingsUpdate(null, s_store.GetApplicationSettings(ApplicationName, Tier, DataCenter), s_store);
-        }
-
-        public static void CheckForSettingUpdates()
-        {
-            if (!s_store.IsCurrent(Settings))
-                ReloadSettings();
         }
 
         private static void OnSettingsUpdate(Exception ex, Settings settings, NFigRedisStore<Settings, Tier, DataCenter> store)
